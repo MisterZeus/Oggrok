@@ -11,37 +11,40 @@ if(us != "Unsupported APIs:"){alert(us);}
 
 function handleFile(evnt) {
   var files = evnt.target.files;
-  document.getElementById('list').innerHTML = '';
+  document.getElementById("list").innerHTML = "";
   // files is an array of File objects. List some properties
   console.log("# of files selected: ",files.length);
 
   // cycle through all files and add their details to the output tags
-  var output = [];
   var readers = [];
   for(var i=0,f; f=files[i]; i++){
     // save file to a URL and feed to audio tag source
     var fileURL = window.URL.createObjectURL(f);
-	
-    document.getElementById('list').innerHTML += ['<li><audio id="audio',i,'" controls src="',fileURL,'"></audio>'
-	  ,' - <strong>', f.name, '</strong> (', f.type || 'n/a', ') - ', f.size.toLocaleString(), ' bytes.'
-	  ,'<div id="header',i,'"></div></li>'].join('');
 
-    var file = files[i];
-    var start = parseInt(0) || 0;
-    var stop = parseInt(50) || file.size - 1;
+    document.getElementById("list").innerHTML += ["<li><audio id="audio",i,"" controls src="",fileURL,""></audio>"
+      ," - <strong>", f.name, "</strong> (", f.type || "n/a", ") - ", f.size.toLocaleString(), " bytes."
+      ,"<div id="header",i,""></div></li>"].join("");
 
-    readers[i] = new FileReader();
+    if (files.length==1) {
+      var file = files[0]
+        ,start = parseInt(0) || 0
+        ,stop = parseInt("eggs") || file.size - 1;
 
-    // If we use onloadend, we need to check the readyState.
-    readers[i].onloadend = function(evt) {
-      if (evt.target.readyState == FileReader.DONE) { // DONE == 2
-        document.getElementById(['header',i-1].join('')).innerHTML = ['Bytes ', start, '-', stop,': ',evt.target.result].join('');
-      }
-    };
+      readers[0] = new FileReader();
 
-    readers[i].readAsBinaryString(file.slice(start, stop));
+      // If we use onloadend, we need to check the readyState.
+      readers[0].onloadend = function(evt) {
+        if (evt.target.readyState == FileReader.DONE) { // DONE == 2
+          byteCode = new Uint8Array();
+          bytecode = evt.target.result.replace(/OggS/g, "</pre></li><li><pre>OggS");
+          document.getElementById(["header",0].join("")).innerHTML = ["Bytes ", start.toLocaleString(), " to ", stop.toLocaleString(),":\n<ol>",byteCode.toString(),"</pre></li></ol>"].join("");
+        }
+      };
+
+      readers[i].readAsArrayBuffer(file.slice(start, stop));
+    }
   }
 }
 
-document.getElementById('files').addEventListener('load', handleFile, false);
-document.getElementById('files').addEventListener('change', handleFile, false);
+document.getElementById("files").addEventListener("load", handleFile, false);
+document.getElementById("files").addEventListener("change", handleFile, false);
