@@ -23,7 +23,17 @@ if (!window.URL) {
 if (us != "Unsupported APIs:") {
   alert(us);
 }
-
+function OggPacket(version, typeFlags, granulePosition, streamSerial, pageNum, crcChecksum, numberOfSegments, segmentTable, payloads) {
+  this.version = version;
+  this.typeFlags = typeFlags;
+  this.granulePosition = granulePosition;
+  this.streamSerial = streamSerial;
+  this.pageNum = pageNum;
+  this.crcChecksum = crcChecksum;
+  this.numberOfSegments = numberOfSegments;
+  this.segmentTable = segmentTable;
+  this.payloads = payloads;
+}
 function Uint8ArrayToHex(buf) {
   var hexEncodeArray = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
   var arr = new Uint8Array(buf); //change our file object into a list of 8-bit integers
@@ -34,7 +44,13 @@ function Uint8ArrayToHex(buf) {
     ret += hexEncodeArray[code & 0x0F]; //change the 4 Less Significant Bits into hex
     ret += " ";
   }
-  return ret.replace(/4F 67 67 53/g, "</li><li>OggS").replace(/4F 70 75 73 48 65 61 64/g, "</li><li>OpusHead");
+  var packets = ret.split(/4F 67 67 53/g); //"OggS" capture pattern
+  if (packets[0] !== "") {
+    console.log("Non-Ogg data found at beginning of file: " + packets[0]);
+  };
+  packets.shift();
+  var versions = new Uint8Array(packets.slice(1, 1));
+  return ret.replace(/4F 67 67 53/g, "</li><li>OggS").replace(/4F 70 75 73 48 65 61 64/g, "<br/>OpusHead");
 }
 
 function loadFiles(evnt) {
