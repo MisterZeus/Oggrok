@@ -32,31 +32,41 @@ function Uint8ArrayToHex(buffer) {
     var code = arr[i];
     ret += hexEncodeArray[code >>> 4]; //change the 4 Most Significant Bits into hex
     ret += hexEncodeArray[code & 0x0F]; //change the 4 Less Significant Bits into hex
-    ret += " ";
   }
-  var packets = ret.split(/4F 67 67 53 /g); //"OggS" capture pattern
+  var packets = ret.split(/4F676753/g); //"OggS" capture pattern
   if (packets[0] !== "") {
     console.log("WARNING: Non-Ogg data found at beginning of file: " + packets[0]);
   };
   packets.shift(); //remove first value: packets[0]
+
   var versions = [];
   var typeFlags = [];
   var granulePositions = [];
   var streamSerials = [];
   var pageNumbers = [];
+  var crcChecksums = [];
+  var pageSegments = [];
+  var pageLacingSizes = [][];
+
   packets.forEach(function(packet, i){
     versions[i] = packet.slice(0, 2);
-    typeFlags[i] = packet.slice(3, 5);
-    granulePositions[i] = packet.slice(6, 29);
-    streamSerials[i] = packet.slice(30, 41);
-    pageNumbers[i] = packet.slice(42, 53);
+    typeFlags[i] = packet.slice(2, 4);
+    granulePositions[i] = packet.slice(4, 20);
+    streamSerials[i] = packet.slice(20, 28);
+    pageNumbers[i] = packet.slice(28, 36);
+    crcChecksums[i] = packet.slice(36, 44);
+    pageSegments[i] = packet.slice(44, 46);
   });
+
   console.log(versions);
   console.log(typeFlags);
   console.log(granulePositions);
   console.log(streamSerials);
   console.log(pageNumbers);
-  return ret.replace(/4F 67 67 53/g, "</li><li>O  g  g  S ").replace(/4F 70 75 73 48 65 61 64/g, "<br/>O  p  u  s  H  e  a  d ").replace(/4F 70 75 73 54 61 67 73/g, "<br/>O  p  u  s  T  a  g  s ");
+  console.log(crcChecksums);
+  console.log(pageSegments);
+
+  return ret.replace(/4F676753/g, "</li><li>O g g S ").replace(/4F70757348656164/g, "<br/>O p u s H e a d ").replace(/4F70757354616773/g, "<br/>O p u s T a g s ");
 }
 
 function parseFile(fileIn) {
@@ -80,9 +90,9 @@ function parseFile(fileIn) {
 function loadFiles(evnt) {
   var files = evnt.target.files; //files is an array of File objects
 
-  document.getElementById("list").innerHTML = ""; //clear previously loaded files
+  document.getElementById("list").innerHTML = ""; //clear any previously loaded files
 
-  for (var i = 0; i < files.length; i++) {//cycle through all files and add them to the output list
+  for (var i = 0; i < files.length; i++) { //cycle through all files and add them to the output list
     var f = files[i];
     var fileURL = window.URL.createObjectURL(f); //save file to a URL, to feed to audio tag source
 
@@ -106,4 +116,4 @@ function readmultifiles(e) {
   });
 };
 */
-document.getElementById("files").addEventListener("change", loadFiles, false);
+document.getElementById("filePicker").addEventListener("change", loadFiles, false);
