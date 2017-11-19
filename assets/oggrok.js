@@ -23,17 +23,7 @@ if (!window.URL) {
 if (us != "Unsupported APIs:") {
   alert(us);
 }
-function OggPacket(version, typeFlags, granulePosition, streamSerial, pageNum, crcChecksum, numberOfSegments, segmentTable, payloads) {
-  this.version = version;
-  this.typeFlags = typeFlags;
-  this.granulePosition = granulePosition;
-  this.streamSerial = streamSerial;
-  this.pageNum = pageNum;
-  this.crcChecksum = crcChecksum;
-  this.numberOfSegments = numberOfSegments;
-  this.segmentTable = segmentTable;
-  this.payloads = payloads;
-}
+
 function Uint8ArrayToHex(buffer) {
   var arr = new Uint8Array(buffer); //change our file object into a list of 8-bit integers
   var hexEncodeArray = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
@@ -44,13 +34,47 @@ function Uint8ArrayToHex(buffer) {
     ret += hexEncodeArray[code & 0x0F]; //change the 4 Less Significant Bits into hex
     ret += " ";
   }
-  var packets = ret.split(/4F 67 67 53/g); //"OggS" capture pattern
+  var packets = ret.split(/4F 67 67 53 /g); //"OggS" capture pattern
   if (packets[0] !== "") {
     console.log("WARNING: Non-Ogg data found at beginning of file: " + packets[0]);
   };
   packets.shift(); //remove first value: packets[0]
-  var versions = new Uint8Array(packets.slice(1, 1));
+  var versions = [];
+  var typeFlags = [];
+  var granulePositions = [];
+  var streamSerials = [];
+  var pageNumbers = [];
+  packets.forEach(function(packet, i){
+    versions[i] = packet.slice(0, 2);
+    typeFlags[i] = packet.slice(3, 5);
+    granulePositions[i] = packet.slice(6, 29);
+    streamSerials[i] = packet.slice(30, 41);
+    pageNumbers[i] = packet.slice(42, 53);
+  });
+  console.log(versions);
+  console.log(typeFlags);
+  console.log(granulePositions);
+  console.log(streamSerials);
+  console.log(pageNumbers);
   return ret.replace(/4F 67 67 53/g, "</li><li>O  g  g  S ").replace(/4F 70 75 73 48 65 61 64/g, "<br/>O  p  u  s  H  e  a  d ").replace(/4F 70 75 73 54 61 67 73/g, "<br/>O  p  u  s  T  a  g  s ");
+}
+
+function parseFile(fileIn) {
+  (function () {
+    var file = fileIn, start = parseInt(0) || 0, stop = parseInt("eggs") || file.size - 1;
+    var reader = new FileReader();
+    reader.onloadend = function (evt) {
+      //since we are using onloadend, we need to check the readyState === DONE
+      if (evt.target.readyState === FileReader.DONE) {
+        var byteCode = new Uint8Array();
+        byteCode = evt.target.result;
+        var packetsList = ["Bytes ", start.toLocaleString(), " to ", stop.toLocaleString(), ":"].join("");
+        packetsList += [";\n<ol>", Uint8ArrayToHex(byteCode).toString(), "</pre></li></ol>"].join("");
+        document.getElementById(["header", 0].join("")).innerHTML = packetsList;
+      }
+    };
+    reader.readAsArrayBuffer(file.slice(start, stop));
+  })();
 }
 
 function loadFiles(evnt) {
@@ -67,22 +91,6 @@ function loadFiles(evnt) {
     if (files.length == 1) {
       parseFile(files[0]);
     }
-  }
-
-  function parseFile(fileIn) {
-    (function () {
-      var file = fileIn, start = parseInt(0) || 0, stop = parseInt("eggs") || file.size - 1;
-      var reader = new FileReader();
-      reader.onloadend = function (evt) {
-        //since we are using onloadend, we need to check the readyState === DONE
-        if (evt.target.readyState === FileReader.DONE) {
-          var byteCode = new Uint8Array();
-          byteCode = evt.target.result;
-          document.getElementById(["header", 0].join("")).innerHTML = ["Bytes ", start.toLocaleString(), " to ", stop.toLocaleString(), ":\n<ol>", Uint8ArrayToHex(byteCode).toString(), "</pre></li></ol>"].join("");
-        }
-      };
-      reader.readAsArrayBuffer(file.slice(start, stop));
-    })();
   }
 }
 /*
