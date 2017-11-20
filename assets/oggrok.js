@@ -46,7 +46,7 @@ function Uint8ArrayToHex(buffer) {
   var pageNumbers = [];
   var crcChecksums = [];
   var pageSegments = [];
-  var pageLacingSizes = [][];
+  var pageLacingSizes = [];
 
   packets.forEach(function(packet, i){
     versions[i] = packet.slice(0, 2);
