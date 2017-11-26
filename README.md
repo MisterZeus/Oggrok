@@ -1,3 +1,19 @@
+## Oggrok
+A file analyser specialising in the [Ogg Opus](https://opus-codec.org/) format.
+
+## Rough Spec
+
+You should be able to pick an Opus file off your hard drive and load it into your browser to peek at what's inside it.
+The file's tree structure should be made apparent i.e. the Ogg packets and their settings, the Opus-to-Ogg mapping headers, and the Opus data within the Ogg payloads.
+
+Perhaps Oggok should go to the extra effort of parsing the Opus packet headers, to show further what's going on with the compressed audio contained in them.
+
+The hierarchy of the data is:
+- File and its summary data (size, MIMEtype, number of Ogg packets)
+- Ogg packet, with its headers and lacing values
+- Ogg lacing value payloads
+- Opus frames and their headers
+
 ## Welcome to GitHub Pages
 
 You can use the [editor on GitHub](https://github.com/MisterZeus/Oggrok/edit/master/README.md) to maintain and preview the content for your website in Markdown files.

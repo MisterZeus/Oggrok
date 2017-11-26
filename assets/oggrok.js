@@ -58,13 +58,13 @@ function Uint8ArrayToHex(buffer) {
     pageSegments[i] = packet.slice(44, 46);
   });
 
-  console.log(versions);
-  console.log(typeFlags);
-  console.log(granulePositions);
-  console.log(streamSerials);
-  console.log(pageNumbers);
-  console.log(crcChecksums);
-  console.log(pageSegments);
+  console.log("versions:" + versions);
+  console.log("typeFlags:" + typeFlags);
+  console.log("granulePositions:" + granulePositions);
+  console.log("streamSerials:" + streamSerials);
+  console.log("pageNumbers:" + pageNumbers);
+  console.log("crcChecksums:" + crcChecksums);
+  console.log("pageSegments:" + pageSegments);
 
   return ret.replace(/4F676753/g, "</li><li>O g g S ").replace(/4F70757348656164/g, "<br/>O p u s H e a d ").replace(/4F70757354616773/g, "<br/>O p u s T a g s ");
 }
