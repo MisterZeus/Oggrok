@@ -2,7 +2,8 @@
 
 //check if this browser supports various APIs we need
 
-var us = "Unsupported APIs:";
+var title = "Unsupported JavaScript APIs:";
+var us = title;
 
 if (!window.Blob) {
   us += "\n - Blob";
@@ -20,7 +21,7 @@ if (!window.URL) {
   us += "\n - URL";
 }
 
-if (us != "Unsupported APIs:") {
+if (us != title) {
   alert(us);
 }
 
@@ -35,9 +36,11 @@ function Uint8ArrayToHex(buffer) {
   }
   var packets = ret.split(/4F676753/g); //"OggS" capture pattern
   if (packets[0] !== "") {
-    console.log("WARNING: Non-Ogg data found at beginning of file: " + packets[0]);
+    console.log(`WARNING: Non-Ogg data found at beginning of file: ${packets[0]}`);
+  }
+  else {
+    packets.shift(); //remove first value: packets[0]
   };
-  packets.shift(); //remove first value: packets[0]
 
   var versions = [];
   var typeFlags = [];
