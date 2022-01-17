@@ -2,8 +2,8 @@
 
 //check if this browser supports various APIs we need
 
-var title = "Unsupported JavaScript APIs:";
-var us = title;
+let title = "Unsupported JavaScript APIs:";
+let us = title;
 
 if (!window.Blob) {
   us += "\n - Blob";
@@ -25,65 +25,120 @@ if (us != title) {
   alert(us);
 }
 
-function Uint8ArrayToHex(buffer) {
-  var arr = new Uint8Array(buffer); //change our file object into a list of 8-bit integers
-  var hexEncodeArray = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
-  var ret = '';
-  for (var i = 0; i < arr.byteLength; i++) {
-    var code = arr[i];
-    ret += hexEncodeArray[code >>> 4]; //change the 4 Most Significant Bits into hex
-    ret += hexEncodeArray[code & 0x0F]; //change the 4 Less Significant Bits into hex
-  }
-  var packets = ret.split(/4F676753/g); //"OggS" capture pattern
-  if (packets[0] !== "") {
-    console.log(`WARNING: Non-Ogg data found at beginning of file: ${packets[0]}`);
-  }
-  else {
-    packets.shift(); //remove first value: packets[0]
-  };
-
-  var versions = [];
-  var typeFlags = [];
-  var granulePositions = [];
-  var streamSerials = [];
-  var pageNumbers = [];
-  var crcChecksums = [];
-  var pageSegments = [];
-  var pageLacingSizes = [];
-
-  packets.forEach(function(packet, i){
-    versions[i] = packet.slice(0, 2);
-    typeFlags[i] = packet.slice(2, 4);
-    granulePositions[i] = packet.slice(4, 20);
-    streamSerials[i] = packet.slice(20, 28);
-    pageNumbers[i] = packet.slice(28, 36);
-    crcChecksums[i] = packet.slice(36, 44);
-    pageSegments[i] = packet.slice(44, 46);
-  });
-
-  console.log("versions:" + versions);
-  console.log("typeFlags:" + typeFlags);
-  console.log("granulePositions:" + granulePositions);
-  console.log("streamSerials:" + streamSerials);
-  console.log("pageNumbers:" + pageNumbers);
-  console.log("crcChecksums:" + crcChecksums);
-  console.log("pageSegments:" + pageSegments);
-
-  return ret.replace(/4F676753/g, "</li><li>O g g S ").replace(/4F70757348656164/g, "<br/>O p u s H e a d ").replace(/4F70757354616773/g, "<br/>O p u s T a g s ");
+function HexToInt (hexValue){
+  return parseInt(`0x${hexValue}`)
 }
 
-function parseFile(fileIn) {
+function Uint8ArrayToHex(buffer) {
+  //change our file object into a list of 8-bit integers
+  let arr = new Uint8Array(buffer);
+  
+  let hexEncodeArray = [
+    '0', '1', '2', '3', '4', '5', '6', '7',
+    '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+  ];
+  
+  let dataInHex = '';
+  
+  for (
+    let i = 0;
+    i < arr.byteLength;
+    i++
+    ) {
+    let code = arr[i];
+    
+    dataInHex += hexEncodeArray[code >> 4]; // 4 Most Significant Bits into hex
+
+    dataInHex += hexEncodeArray[code & 0x0F]; // 4 Less Significant Bits into hex
+  }
+  return dataInHex;
+}
+
+function parseFile(fileIndex,fileIn) {
   (function () {
-    var file = fileIn, start = parseInt(0) || 0, stop = parseInt("eggs") || file.size - 1;
-    var reader = new FileReader();
+    let file = fileIn
+      ,start = parseInt(0) || 0
+      ,stop = parseInt("eggs") || file.size - 1;
+
+    let reader = new FileReader();
+
     reader.onloadend = function (evt) {
-      //since we are using onloadend, we need to check the readyState === DONE
+      // Since we are using onloadend,
+      // we need to check the readyState === DONE
       if (evt.target.readyState === FileReader.DONE) {
-        var byteCode = new Uint8Array();
+        // Convert our file into an array of unsigned integer bytes
+        let byteCode = new Uint8Array();
         byteCode = evt.target.result;
-        var packetsList = ["Bytes ", start.toLocaleString(), " to ", stop.toLocaleString(), ":"].join("");
-        packetsList += [";\n<ol>", Uint8ArrayToHex(byteCode).toString(), "</pre></li></ol>"].join("");
-        document.getElementById(["header", 0].join("")).innerHTML = packetsList;
+  
+        // Convert our array of unsigned integer bytes into hex
+        let dataInHexString = Uint8ArrayToHex(byteCode).toString();
+        
+        //split string at "OggS" capture pattern
+        let oggPackets = dataInHexString.split(/4F676753/g);
+        
+        // Since we expect our file to start with "OggS"
+        // and we are splitting on "OggS",
+        // we should have an empty first element!
+        if (oggPackets[0] !== "") {
+          let fourCC = oggPackets[0].slice(0, 4);
+      
+          console.log(`Non-Ogg data found at beginning of file: "${fourCC}"`);
+        }
+        else {
+          oggPackets.shift(); //remove first value: packets[0]
+        };
+      
+        let versions = [];
+        let typeFlags = [];
+        let granulePositions = [];
+        let streamSerials = [];
+        let pageNumbers = [];
+        let crcChecksums = [];
+        let pageSegments = [];
+      
+        oggPackets.forEach(function(packet, i){
+          versions[i]         = packet.slice( 0,  2);
+          typeFlags[i]        = packet.slice( 2,  4);
+          granulePositions[i] = packet.slice( 4, 20);
+          streamSerials[i]    = packet.slice(20, 28);
+          pageNumbers[i]      = packet.slice(28, 36);
+          crcChecksums[i]     = packet.slice(36, 44);
+          pageSegments[i]     = packet.slice(44, 46);
+      
+          let packetList = `<ol id="oggPacket${i}"/>`;
+
+          document.getElementById(`header${fileIndex}`).innerHTML += packetList;
+
+          let oggPacketString = "";
+
+          oggPacketString += `<li>Version: ${versions[i]}</li>`;
+
+          oggPacketString += `<li>Type Flags: ${typeFlags[i]}`;
+          const typeFlagsInt = HexToInt(typeFlags[i]);
+          oggPacketString += (typeFlagsInt & 0x1 ? ` Continued packet` : ` Fresh packet`);
+          oggPacketString += (typeFlagsInt & 0x2 ? `, first page` : ``);
+          oggPacketString += (typeFlagsInt & 0x4 ? `, last page` : ``);
+          oggPacketString += `</li>`;
+
+          oggPacketString += `<li>Granule Position: ${granulePositions[i]}</li>`;
+          oggPacketString += `<li>Stream Serial: ${streamSerials[i]}</li>`;
+          oggPacketString += `<li>Page Number: ${pageNumbers[i]}</li>`;
+          oggPacketString += `<li>CRC: ${crcChecksums[i]}</li>`;
+          oggPacketString += `<li>Segment: ${pageSegments[i]}</li>`;
+          
+          oggPacketString.replace(/4F70757348656164/g, "<br/>O p u s H e a d ");
+          oggPacketString.replace(/4F70757354616773/g, "<br/>O p u s T a g s ");
+          
+          document.getElementById(`oggPacket${i}`).innerHTML += oggPacketString;
+        });
+      
+        console.log(`oggVersions: ${versions}`);
+        console.log(`oggTypeFlags: ${typeFlags}`);
+        console.log(`oggGranulePositions: ${granulePositions}`);
+        console.log(`oggStreamSerials: ${streamSerials}`);
+        console.log(`oggPageNumbers: ${pageNumbers}`);
+        console.log(`oggCrcChecksums: ${crcChecksums}`);
+        console.log(`oggPageSegments: ${pageSegments}`);
       }
     };
     reader.readAsArrayBuffer(file.slice(start, stop));
@@ -91,32 +146,61 @@ function parseFile(fileIn) {
 }
 
 function loadFiles(evnt) {
-  var files = evnt.target.files; //files is an array of File objects
+  const selectedFiles = evnt.target.files; //files is an array of File objects
+  
+  if (selectedFiles.length == 0) {
+    console.log("selectedFiles.length == 0");
+    alert("No files selected. Please select a valid Ogg Opus file.");
+  }
+  else {
+    //clear any previously loaded files
+    document.getElementById("list").innerHTML = "";
 
-  document.getElementById("list").innerHTML = ""; //clear any previously loaded files
+    //cycle through all selected files and add them to the output list
+    for (
+      let fileIndex = 0;
+      fileIndex < selectedFiles.length;
+      fileIndex++
+      )
+    {
+      
+      const file = selectedFiles[fileIndex];
 
-  for (var i = 0; i < files.length; i++) { //cycle through all files and add them to the output list
-    var f = files[i];
-    var fileURL = window.URL.createObjectURL(f); //save file to a URL, to feed to audio tag source
+      // we need this to convert Unix epoch integer into an actual date
+      const fileDate = new Date(file.lastModified);
 
-    document.getElementById("list").innerHTML += ['<li><audio id="audio', i, '" controls src="', fileURL, '"></audio>', ' - <strong>', f.name, '</strong> (', f.type || "n/a", ') - ', f.size.toLocaleString(), ' bytes.', '<div id="header', i, '"></div></li>'].join('');
+      const headerString = [
+        '<li>'
+       ,'<p>', 'Name: ', file.name, '</p>'
+       ,'<p>', 'Type: ', file.type || "n/a", '</p>'
+       ,'<p>', 'Size: ', file.size.toLocaleString(), ' bytes.', '</p>'
+       ,'<p>', 'Last Modified: ', fileDate.toLocaleString(), '</p>'
+       ,'<div id="header', fileIndex, '"></div>'
+       ,'</li>'
+      ].join('');
 
-    if (files.length == 1) {
-      parseFile(files[0]);
+      document.getElementById("list").innerHTML += headerString;
+
+      if ( file.type == "audio/ogg"
+        || file.type == "audio/wav"
+      ) {
+        //save file to a URL, to feed to audio tag source
+        const fileURL = window.URL.createObjectURL(file);
+
+        const audioTag = `<audio id="audio${fileIndex}" src="${fileURL}" controls></audio>`;
+
+        document.getElementById("list").innerHTML += audioTag;
+      }
+
+      if ( file.type == "audio/ogg"
+        || file.type == "audio/wav"
+      ) {
+        parseFile (fileIndex, file);
+      } else {
+        console.log (`Not parsing file ${file.name} because its type is "${file.type}".`);
+      }
     }
   }
 }
-/*
-function readmultifiles(e) {
-  var files = e.currentTarget.files;
-  Object.keys(files).forEach(function (i) {
-    var file = files[i];
-    var reader = new FileReader();
-    reader.onload = function (e) {
-      //server call for uploading or reading the files one by one by using 'reader.result' or 'file'
-    };
-    reader.readAsBinaryString(file);
-  });
-};
-*/
+
 document.getElementById("filePicker").addEventListener("change", loadFiles, false);
