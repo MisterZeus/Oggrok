@@ -1,6 +1,8 @@
 ## Oggrok
 A file analyser specialising in the [Ogg Opus](https://opus-codec.org/) format.
 
+Try it [here](https://misterzeus.github.io/Oggrok/).
+
 ## Rough Spec
 
 You should be able to pick an Opus file off your hard drive and load it into your browser to peek at what's inside it.
