@@ -27,8 +27,10 @@ function Uint8ArrayToHex(buffer) {
   let arr = new Uint8Array(buffer);
 
   const hexEncodeArray = [
-    '0', '1', '2', '3', '4', '5', '6', '7',
-    '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+    '0', '1', '2', '3',
+    '4', '5', '6', '7',
+    '8', '9', 'A', 'B',
+    'C', 'D', 'E', 'F'
   ];
 
   let dataInHex = '';
@@ -78,8 +80,6 @@ function loadFiles(evnt) {
        ,'<p>Type: ', file.type || "n/a", '</p>'
        ,'<p>Size: ', file.size.toLocaleString(), ' bytes.</p>'
        ,'<p>Last Modified: ', fileDate.toLocaleString(), '</p>'
-       ,`<div id="header${fileIndex}"></div>`
-       ,'</li>'
       ].join('');
 
       document.getElementById("list").innerHTML += headerString;
@@ -94,6 +94,7 @@ function loadFiles(evnt) {
         const audioTag = `<audio id="audio${fileIndex}" src="${fileURL}" controls></audio>`;
 
         document.getElementById("list").innerHTML += audioTag;
+        document.getElementById("list").innerHTML += `<div id="header${fileIndex}"></div></li>`;
       }
 
       if ( file.type == "audio/ogg"
@@ -117,13 +118,12 @@ function loadFile(fileIndex,fileIn) {
 
   reader.onloadend = function(evt) {
     // Convert our file into an array of unsigned integer bytes
-    let byteCode = new Uint8Array();
-    byteCode = evt.target.result;
+    const byteCode = new Uint8Array(evt.target.result);
 
-    parseFile(byteCode, fileIndex);
+    parseFile(fileIndex, byteCode);
   };
 
-  reader.readAsBinaryString(file.slice(start, stop));
+  reader.readAsArrayBuffer(file.slice(start, stop));
 }
 
 let readIndex = 0; // global
@@ -134,11 +134,32 @@ function readXbytesFromY(bytesToRead, byteSource) {
   return returnBytes;
 }
 
-function parseFile (bytes, fileIndex) {
-  const magicBytes = readXbytesFromY(4, bytes);
+function readBytesTillNext(stringToFind, byteSource) {
+  let offset = 0;
+  while (readIndex + offset + stringToFind.length < byteSource.length) {
+    const readAheadBytes = byteSource.slice(
+      readIndex + offset,
+      readIndex + offset + stringToFind.length
+      );
+    if (readAheadBytes === stringToFind) {
+      const returnBytes = byteSource.slice(readIndex, readIndex + offset);
+      readIndex += offset;
+      return returnBytes;
+    } else{
+      offset++;
+    }
+  }
+}
 
-  if (magicBytes != 'OggS') {
-    console.log(`Non-Ogg data found at start of file: "${magicBytes}"`);
+const OGGS_BYTES = `OggS`;
+
+function parseFile (fileIndex, bytes) {
+  readIndex = 0; //start at first byte of this file
+  const magicBytes = readXbytesFromY(4, bytes);
+  const fourCC = new TextDecoder().decode(magicBytes);
+
+  if (fourCC !== OGGS_BYTES) {
+    console.log(`Non-OggS data found at start of file:\n${magicBytes}`);
     return;
   }
 
@@ -150,39 +171,44 @@ function parseFile (bytes, fileIndex) {
   const crcChecksum     = readXbytesFromY( 8, bytes);
   const pageSegments    = readXbytesFromY( 4, bytes);
 
-  let packetList = `<ol id="F${fileIndex}P${i}"/>`;
+  const pageData = readBytesTillNext(OGGS_BYTES, bytes);
+
+  let packetList = `<ol id="file${fileIndex}"/>`;
 
   document.getElementById(`header${fileIndex}`).innerHTML += packetList;
 
   let oggPacketString = "<li>";
 
-  oggPacketString += `Version: ${versions[i]}\n`;
+  oggPacketString += `Version: ${version}\n`;
 
-  oggPacketString += `Type Flags: ${typeFlags[i]}`;
-  const typeFlagsInt = HexToInt(typeFlags[i]);
+  oggPacketString += `Type Flags: ${typeFlags}`;
+  const typeFlagsInt = HexToInt(typeFlags);
   oggPacketString += (typeFlagsInt & 0x1 ? ` Continued packet` : ` Fresh packet`);
   oggPacketString += (typeFlagsInt & 0x2 ? `, first page` : ``);
   oggPacketString += (typeFlagsInt & 0x4 ? `, last page` : ``);
   oggPacketString += `\n`;
 
-  oggPacketString += `Granule Position: ${granulePositions[i]}\n`;
-  oggPacketString += `Stream Serial: ${streamSerials[i]}\n`;
-  oggPacketString += `Page Number: ${pageNumbers[i]}\n`;
-  oggPacketString += `CRC: ${crcChecksums[i]}\n`;
-  oggPacketString += `Segment: ${pageSegments[i]}\n`;
+  oggPacketString += `Granule Position: ${granulePosition}\n`;
+  oggPacketString += `Stream Serial: ${streamSerial}\n`;
+  oggPacketString += `Page Number: ${pageNumber}\n`;
+  oggPacketString += `CRC: ${crcChecksum}\n`;
+  oggPacketString += `Segment: ${pageSegments}\n`;
+
+  oggPacketString += `Page Data: ${pageData}\n`;
 
   oggPacketString.replace(/4F70757348656164/g, "<br/>O p u s H e a d ");
   oggPacketString.replace(/4F70757354616773/g, "<br/>O p u s T a g s ");
 
-  document.getElementById(`F${fileIndex}P${i}`).innerHTML += oggPacketString;
+  document.getElementById(`file${fileIndex}`).innerHTML += oggPacketString;
 
-  console.log(`oggVersions: ${versions}`);
+  console.log(`oggVersions: ${version}`);
   console.log(`oggTypeFlags: ${typeFlags}`);
-  console.log(`oggGranulePositions: ${granulePositions}`);
-  console.log(`oggStreamSerials: ${streamSerials}`);
-  console.log(`oggPageNumbers: ${pageNumbers}`);
-  console.log(`oggCrcChecksums: ${crcChecksums}`);
+  console.log(`oggGranulePositions: ${granulePosition}`);
+  console.log(`oggStreamSerials: ${streamSerial}`);
+  console.log(`oggPageNumbers: ${pageNumber}`);
+  console.log(`oggCrcChecksums: ${crcChecksum}`);
   console.log(`oggPageSegments: ${pageSegments}`);
+  console.log(`oggPageData: ${pageData}`);
 }
 
 // main ^_^
