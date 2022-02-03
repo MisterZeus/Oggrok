@@ -4,17 +4,15 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Oggrok</title>
+    <title>Oggrok, an Ogg file analyser</title>
     <meta name="description" content="Oggrok, a file analyser specialising in the Ogg Opus format.">
   </head>
   <body>
-    <h1>Oggrok</h1>
+    <h1><abbr title="It groks Ogg.">Oggrok</abbr></h1>
     <h2>A file analyser specialising in the <a href="https://opus-codec.org/">Ogg Opus</a> format.</h2>
-	<div>
-      <p>
-        <input type="file" title="Pick some files:" id="filePicker" accept="audio/ogg,.ogg,.opus" multiple/></p>
-      <ol id="list" style="word-wrap: break-word; font-family: Consolas"></ol>
-	</div>
+    <p>Pick some files:
+      <input type="file" title="Pick some files:" id="filePicker" accept="audio/*,.ogg,.opus" multiple/></p>
+    <ol id="list" style="word-wrap: break-word; font-family: Consolas"></ol>
     <script src="./assets/oggrok.js"></script>
   </body>
 </html>
