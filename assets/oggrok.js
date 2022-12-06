@@ -14,6 +14,29 @@ if (!window.URL) {us += "\n - URL";}
 
 if (us != title) {alert(us);}
 
+// Prevent default behavior (Prevent file from being opened)
+function dragOverHandler(ev) {ev.preventDefault();}
+
+function dropHandler(ev) {
+  ev.preventDefault();
+
+  if (ev.dataTransfer.items) {
+    // Use DataTransferItemList interface to access the file(s)
+    [...ev.dataTransfer.items].forEach((item, i) => {
+      // If dropped items aren't files, reject them
+      if (item.kind === 'file') {
+        const file = item.getAsFile();
+        loadFile(i, file);
+      }
+    });
+  } else {
+    // Use DataTransfer interface to access the file(s)
+    [...ev.dataTransfer.files].forEach((file, i) => {
+      console.log(`… file[${i}].name = ${file.name}`);
+    });
+  }
+}
+
 function HexToInt (hexValue){
   return parseInt(`0x${hexValue}`);
 }
@@ -50,7 +73,7 @@ function Uint8ArrayToHex(buffer) {
 }
 
 
-function loadFiles(evnt) {
+function FilePickerHandler(evnt) {
   const selectedFiles = evnt.target.files; //files is an array of File objects
 
   if (selectedFiles.length == 0) {
@@ -58,6 +81,11 @@ function loadFiles(evnt) {
     alert("No files selected. Please select a valid Ogg Opus file.");
   }
   else {
+    loadFiles(selectedFiles)
+  }
+}
+
+function loadFiles(selectedFiles){
     //clear any previously loaded files
     document.getElementById("list").innerHTML = "";
 
@@ -107,7 +135,6 @@ function loadFiles(evnt) {
       }
     }
   }
-}
 
 function loadFile(fileIndex,fileIn) {
   let file = fileIn
@@ -212,4 +239,4 @@ function parseFile (fileIndex, bytes) {
 }
 
 // main ^_^
-document.getElementById("filePicker").addEventListener("change", loadFiles, false);
+document.getElementById("filePicker").addEventListener("change", FilePickerHandler, false);

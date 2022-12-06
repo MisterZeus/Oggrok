@@ -13,7 +13,13 @@
     <p>Pick some files:
       <input type="file" title="Pick some files:" id="filePicker" accept="audio/*,.ogg,.opus" multiple>
     </p>
+    <div id="drop_zone"
+      ondrop="dropHandler(event);"
+      ondragover="dragOverHandler(event);">
+      <p>... or drag some file(s) to this <i>drop zone</i>.</p>
+    </div>
     <ol id="list" style="word-wrap: break-word; font-family: Consolas"></ol>
+    <link href="./assets/oggrok.css" rel="stylesheet">
     <script src="./assets/oggrok.js"></script>
   </body>
 </html>

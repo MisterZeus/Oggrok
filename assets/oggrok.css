@@ -1,0 +1,10 @@
+#drop_zone {
+  border: 5px solid blue;
+  width: 90%;
+  height: 5em;
+}
+
+#filePicker {
+  /*width: 50%;*/
+}
+  
