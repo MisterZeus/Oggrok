@@ -3,3 +3,8 @@
   width: 90%;
   height: 5em;
 }
+
+.noscript {
+  background-color: blueviolet;
+  font-size: x-large;
+}
