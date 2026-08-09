@@ -1,42 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Oggrok, an Ogg file analyser</title>
-	<meta name="description" content="Oggrok, a file analyser specialising in the Ogg Opus format.">
-	<meta http-equiv="Content-Security-Policy"
-		content="
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Oggrok, an Ogg file analyser</title>
+		<meta name="description"
+			content="Oggrok, a file analyser specialising in the Ogg Opus format.">
+		<meta http-equiv="Content-Security-Policy" content="
 		media-src 'self' data: blob:;
 		script-src 'self' 'unsafe-inline';
 		style-src 'self' 'unsafe-inline';
 		connect-src 'self' greeky.report-uri.com;
 		default-src 'self';
 		upgrade-insecure-requests">
-	<script type="text/json" id="csp-report-uri">
+		<script type="text/json" id="csp-report-uri">
 	{"keys" : ["blockedURI", "columnNumber", "disposition", "documentURI", "effectiveDirective", "lineNumber", "originalPolicy", "referrer", "sample", "sourceFile", "statusCode", "violatedDirective"],
 	"reportUri" : "https://greeky.report-uri.com/r/d/csp/enforce"}
 	</script>
-	<link href="./assets/oggrok.css" rel="stylesheet">
-	<link href="apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180">
-	<link href="favicon-32x32.png" rel="icon" type="image/png" sizes="32x32">
-	<link href="favicon-16x16.png" rel="icon" type="image/png" sizes="16x16">
-	<link href="site.webmanifest" rel="manifest">
-	<script defer src="./assets/oggrok.js"></script>
-</head>
-<body>
-	<noscript>This webpage will not work correctly without <a href="https://en.wikipedia.org/wiki/JavaScript">Javascript</a>. Please turn Javascript on in your internet browser.</noscript>
-	<h1><abbr title="It groks Ogg.">Oggrok</abbr></h1>
-	<h2>A file analyser specialising in the <a href="https://opus-codec.org/">Ogg Opus</a> format.</h2>
-	<p>Pick some files:
-		<input type="file" title="Pick some files:" id="filePicker" accept="audio/*,.ogg,.opus" multiple>
-	</p>
-	<div id="drop_zone"
-		ondrop="dropHandler(event);"
-		ondragover="dragOverHandler(event);">
-		<p>... or drag some file(s) to this <i>drop zone</i>.</p>
-	</div>
-	<ol id="list" style="word-wrap: break-word; font-family: Consolas"></ol>
-</body>
+		<link href="./assets/oggrok.css" rel="stylesheet">
+		<link href="apple-touch-icon.png" rel="apple-touch-icon"
+			sizes="180x180">
+		<link href="favicon-32x32.png" rel="icon" type="image/png"
+			sizes="32x32">
+		<link href="favicon-16x16.png" rel="icon" type="image/png"
+			sizes="16x16">
+		<link href="site.webmanifest" rel="manifest">
+		<script defer src="./assets/oggrok.js"></script>
+	</head>
+
+	<body>
+		<noscript>
+			This webpage will not work correctly without <a
+				href="https://en.wikipedia.org/wiki/JavaScript">Javascript</a>.
+			Please turn Javascript on in your internet browser.
+		</noscript>
+		<h1><abbr title="It groks Ogg.">Oggrok</abbr></h1>
+		<h2>A file analyser specialising in the <a
+				href="https://opus-codec.org/">Ogg Opus</a> format.</h2>
+		<p>Pick some files:
+			<input type="file" title="Pick some files:" id="filePicker"
+				accept="audio/*,.ogg,.opus" multiple>
+		</p>
+		<div id="drop_zone" ondrop="dropHandler(event);"
+			ondragover="dragOverHandler(event);">
+			<p>... or drag some file(s) to this <i>drop zone</i>.</p>
+		</div>
+		<ol id="list" style="word-wrap: break-word; font-family: Consolas"></ol>
+	</body>
+
 </html>
